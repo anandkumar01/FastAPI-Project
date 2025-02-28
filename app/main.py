@@ -1,15 +1,16 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .database import get_db
+from .database import get_db, engine
 from .schemas import EmployeeSchema
 from .crud import *
+from . import models
 
 app = FastAPI()
-
+models.Base.metadata.create_all(engine)
 # ------ COMPANY ENDPOINTS ------
 @app.get('/companies/')
 def read_companies(db: Session = Depends(get_db)):
-    return get_all_companies
+    return get_all_companies(db)
 
 @app.get('/companies/{company_id}')
 def read_company(company_id, db: Session = Depends(get_db)):
@@ -44,7 +45,8 @@ def read_employee(emp_id: int, db: Session = Depends(get_db)):
 @app.post('/employees/')
 def add_employee(emp_data: EmployeeSchema, db: Session = Depends(get_db)):
     try:
-        return create_employee(db, emp_data)
+        employee = create_employee(db, emp_data)
+        return employee
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -53,7 +55,7 @@ def modify_employee(emp_id: int, emp_data: EmployeeSchema, db: Session = Depends
     updated_employee = update_employee(db, emp_id, emp_data)
     if not update_employee:
         raise HTTPException(status_code=404, detail="Employee not found!")
-    return update_employee
+    return updated_employee
 
 @app.patch('/employees/{emp_id}')
 def partial_update_employee(emp_id: int, emp_data: dict, db: Session = Depends(get_db)):

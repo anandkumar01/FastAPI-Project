@@ -7,10 +7,10 @@ def get_all_companies(db: Session):
     return db.query(Company).all()
 
 def get_company_by_id(db: Session, company_id: int):
-    return db.query(Company).filter(Company.id == company_id)
+    return db.query(Company).filter(Company.id == company_id).first()
 
 def create_company(db: Session, company_data: CompanySchema):
-    company = Company(**company_data.dict())
+    company = Company(**company_data.model_dump())
     db.add(company)
     db.commit()
     db.refresh(company)
@@ -31,19 +31,28 @@ def get_all_employees(db: Session):
 def get_employee_by_id(db: Session, emp_id: int):
     return db.query(Employee).filter(Employee.id == emp_id).first()
 
+def get_employee_by_email(db: Session, email: str):
+    return db.query(Employee).filter(Employee.email == email).first()
+
 def create_employee(db: Session, emp_data: EmployeeSchema):
     company = db.query(Company).filter(Company.company_name == emp_data.company_name).first()
+    existing_employee = get_employee_by_email(db, emp_data.email)
     if not company:
         raise ValueError("Company not found!")
     
+    if existing_employee:
+        raise ValueError("Employee with this email is already present")
+    
     new_employee = Employee(
         name = emp_data.name,
+        email = emp_data.email,
         designation = emp_data.designation,
         salary = emp_data.salary,
         company = company
     )
     db.add(new_employee)
     db.commit()
+    db.refresh(new_employee)
     return new_employee
 
 def update_employee(db: Session, emp_id: int, emp_data: EmployeeSchema):

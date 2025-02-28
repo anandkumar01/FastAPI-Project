@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DECIMAL
 from sqlalchemy.orm import relationship
 from .database import Base
 
+
 class Company(Base):
     __tablename__ = "companies"
 
@@ -16,6 +17,7 @@ class Employee(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
     designation = Column(String)
     salary = Column(DECIMAL(10, 2))
     company_id = Column(Integer, ForeignKey("companies.id"))
