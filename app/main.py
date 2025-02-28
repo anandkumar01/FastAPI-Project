@@ -50,7 +50,7 @@ def add_employee(emp_data: EmployeeSchema, db: Session = Depends(get_db)):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-@app.put('employees/{emp_id}')
+@app.put('/employees/{emp_id}')
 def modify_employee(emp_id: int, emp_data: EmployeeSchema, db: Session = Depends(get_db)):
     updated_employee = update_employee(db, emp_id, emp_data)
     if not update_employee:
@@ -58,9 +58,9 @@ def modify_employee(emp_id: int, emp_data: EmployeeSchema, db: Session = Depends
     return updated_employee
 
 @app.patch('/employees/{emp_id}')
-def partial_update_employee(emp_id: int, emp_data: dict, db: Session = Depends(get_db)):
+def modify_partial_employee_data(emp_id: int, emp_data: dict, db: Session = Depends(get_db)):
     try:
-        update_employee = patch_employee(db, emp_id, emp_data)
+        update_employee = partial_update_employee_data(db, emp_id, emp_data)
         if not update_employee:
             raise HTTPException(status_code=404, detail="Employee not found!")
         return update_employee

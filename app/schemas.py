@@ -1,7 +1,7 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, EmailStr
 
 class CompanySchema(BaseModel):
+    id: int
     company_name: str
     location: str
 
@@ -10,10 +10,18 @@ class CompanySchema(BaseModel):
 
 class EmployeeSchema(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     designation: str
     salary: float
     company_name: str
+
+class EmployeeResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    designation: str
+    salary: float
+    company: CompanySchema
 
     class Config:
         from_attributes = True
