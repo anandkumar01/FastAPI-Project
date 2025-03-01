@@ -151,57 +151,6 @@ def update_employee(db: Session, emp_id: int, emp_data: EmployeeSchema):
     db.refresh(employee)
     return employee_response
 
-def partial_update_employee_data(db: Session, emp_id: int, emp_data: dict):
-    # Fetch employee
-    employee = db.query(Employee).filter(Employee.id == emp_id).first()
-    if not employee:
-        raise ValueError(f"Employee with ID {emp_id} does not exist.")
-
-    # Prevent duplicate email assignment
-    if "email" in emp_data:
-        existing_employee = db.query(Employee).filter(Employee.email == emp_data["email"], Employee.id != emp_id).first()
-        if existing_employee:
-            raise ValueError(f"Email '{emp_data['email']}' is already assigned to another employee.")
-
-    # Handle company update
-    if "company_name" in emp_data:
-        company_name = emp_data.pop("company_name")  # Remove from update fields
-        company = db.query(Company).filter(Company.company_name == company_name).first()
-        if not company:
-            raise ValueError(f"Company '{company_name}' not found.")
-        employee.company_id = company.id  # Assign new company
-
-    # Handle company location update (if the employee is linked to a valid company)
-    if "location" in emp_data:
-        if not employee.company:
-            raise ValueError("Cannot update location without a valid company.")
-        employee.company.location = emp_data.pop("location")  # Update location
-
-    # Update employee fields dynamically
-    for key, value in emp_data.items():
-        if hasattr(employee, key):
-            setattr(employee, key, value)
-
-    db.commit()
-    db.refresh(employee)
-
-    # Prepare response
-    company_response = CompanySchema(
-        id=employee.company.id,
-        company_name=employee.company.company_name,
-        location=employee.company.location
-    )
-    employee_response = EmployeeResponse(
-        id=employee.id,
-        name=employee.name,
-        email=employee.email,
-        designation=employee.designation,
-        salary=float(employee.salary),
-        company=company_response,
-    )
-
-    return employee_response
-
 
 def partial_update_employee_data(db: Session, emp_id: int, emp_data: dict):
     employee = db.query(Employee).filter(Employee.id == emp_id).first()
