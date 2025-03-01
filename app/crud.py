@@ -1,13 +1,33 @@
 from sqlalchemy.orm import Session
 from .models import Company, Employee
-from .schemas import CompanySchema, EmployeeResponse, EmployeeSchema
+from .schemas import CompanySchema, CompanyResponse, EmployeeResponse, EmployeeSchema
 
 # ------Companies CRUD operations------
 def get_all_companies(db: Session):
-    return db.query(Company).all()
+    companies = db.query(Company).all()
+
+    company_responses = []
+    for company in companies:
+        company_response = CompanyResponse(
+            id=company.id,
+            company_name=company.company_name,
+            location=company.location,
+        )
+        company_responses.append(company_response)
+    return company_responses
+
 
 def get_company_by_id(db: Session, company_id: int):
-    return db.query(Company).filter(Company.id == company_id).first()
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        return None
+
+    company_response = CompanyResponse(
+        id=company.id,
+        company_name=company.company_name,
+        location=company.location,
+    )
+    return company_response
 
 def create_company(db: Session, company_data: CompanySchema):
     company = Company(**company_data.model_dump())
@@ -67,6 +87,7 @@ def get_employee_by_id(db: Session, employee_id: int) -> EmployeeResponse:
 def get_employee_by_email(db: Session, email: str):
     return db.query(Employee).filter(Employee.email == email).first()
 
+# Ensures that the associated company exists and email is unique.
 def create_employee(db: Session, emp_data: EmployeeSchema):
     company = db.query(Company).filter(Company.company_name == emp_data.company_name).first()
     if not company:
@@ -102,6 +123,7 @@ def create_employee(db: Session, emp_data: EmployeeSchema):
     )
     return employee_response
 
+# Update employee details including the associated company.
 def update_employee(db: Session, emp_id: int, emp_data: EmployeeSchema):
     employee = db.query(Employee).filter(Employee.id == emp_id).first()
     if not employee:
@@ -239,7 +261,6 @@ def partial_update_employee_data(db: Session, emp_id: int, emp_data: dict):
     db.commit()
     db.refresh(employee)
 
-    # Prepare response
     company_response = CompanySchema(
         id=employee.company.id,
         company_name=employee.company.company_name,

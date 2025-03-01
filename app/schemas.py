@@ -5,15 +5,21 @@ class CompanySchema(BaseModel):
     company_name: str
     location: str
 
-    class Config:
-        from_attributes = True 
-
 class EmployeeSchema(BaseModel):
     name: str
     email: EmailStr
     designation: str
     salary: float
     company_name: str
+
+class CompanyResponse(BaseModel):
+    id: int
+    company_name: str
+    location: str
+
+    class Config:
+        from_attributes = True
+
 
 class EmployeeResponse(BaseModel):
     id: int

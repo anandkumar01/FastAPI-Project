@@ -7,7 +7,9 @@ from . import models
 
 app = FastAPI()
 models.Base.metadata.create_all(engine)
+
 # ------ COMPANY ENDPOINTS ------
+
 @app.get('/companies/')
 def read_companies(db: Session = Depends(get_db)):
     return get_all_companies(db)
@@ -31,6 +33,7 @@ def remove_company(company_id: int, db: Session = Depends(get_db)):
 
 
 # ------ EMPLOYEE ENDPOINTS ------
+
 @app.get('/employees/')
 def read_employees(db: Session = Depends(get_db)):
     return get_all_employees(db)
