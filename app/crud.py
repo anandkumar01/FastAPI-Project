@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from .models import Company, Employee
-from .schemas import CompanySchema, CompanyResponse, EmployeeResponse, EmployeeSchema
+from models import Company, Employee
+from schemas import CompanySchema, CompanyResponse, EmployeeResponse, EmployeeSchema
 
 # ------Companies CRUD operations------
 def get_all_companies(db: Session):
